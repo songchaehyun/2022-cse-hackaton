@@ -5,6 +5,8 @@
 #define G 3
 #define B 4
 
+#define BUZZER 5
+
 #define TRIG 6 //TRIG 핀 설정 (초음파 보내는 핀) 
 #define ECHO 7 //ECHO 핀 설정 (초음파 받는 핀)
 
@@ -36,17 +38,17 @@ void setup()
 void loop() 
 { 
   if ( in == 1 && idL == 0 ) {
-    Serial.println("NO ID CARD");
-     analogWrite(R, 255),analogWrite(G, 100),analogWrite(B, 0);
-     //부저
+    Serial.println("NO ID CARD"); //ID카드가 없는 차량일 경우
+     analogWrite(R, 255),analogWrite(G, 150),analogWrite(B, 0); //주황색 불을 켠다
      in = inCheck();
      while (in == 1 && idL == 0){
-      Serial.println("keep Orange");
-      
-      delay(2000);
+      Serial.println("keep Yellow");
+      tone(BUZZER, 700, 500); //나가라고 경고
+      delay(1000);
+      tone(BUZZER, 700, 500); //나가라고 경고
       in = inCheck();
       idL = idCheck();
-      if (idL == 1) {
+      if (idL == 1) { //ID카드가 늦게 인식된 경우를 고려. 늦게라도 인식되면 빨간불이 되도록.
         analogWrite(R, 255),analogWrite(G, 0),analogWrite(B, 0);
         Serial.println("Go Welcome");
         return;
@@ -54,28 +56,28 @@ void loop()
      }
   }
   else if ( in == 1 && idL == 1 ) {
-    Serial.println("Welcome");
+    Serial.println("Welcome"); //ID카드 있는 차량
      analogWrite(R, 255), analogWrite(G, 0), analogWrite(B, 0);
      while (in == 1){
-        in = inCheck();
+        in = inCheck(); //차량이 있는지 확인
         if (in == 0){
           idL = 0;
           return;
         }
-        Serial.println("keep WELCOME");
+        Serial.println("keep WELCOME"); //차량이 있다면 = 주차중이라면 계속 빨간 불
         delay(5000);
      }
   }
   else if ( in == 0 && idL == 0) {
-    Serial.println("No car in here");
+    Serial.println("No car in here"); //차량이 없는 경우 초록불을 유지
      analogWrite(R, 0),analogWrite(G, 255),analogWrite(B, 0);
   }
   else {
     Serial.println("error");
   } 
-
   
-    Serial.println("loop start");
+  //아래 부분은 반드시 위의 if-else if-else 구문 뒤에 작성되어야만 함.
+  Serial.println("loop start");
   in = inCheck();
   
   if (in) {
@@ -178,6 +180,5 @@ int idCheck(){
   }
   Serial.println("IDCHECK : ");
   Serial.print(id);
-  Serial.println("a;slkdjf;aljdsflaj;fdslkjafd");
   return id;
 }
